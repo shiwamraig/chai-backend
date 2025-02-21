@@ -2,9 +2,11 @@
 import dotenv from "dotenv"  // then config for it to work properly
 import connectDB from "./db/index.js";
 
+import app from './app.js'
 dotenv.config({
     path:'./env'
 })
+
 
 
 connectDB()
@@ -17,6 +19,21 @@ connectDB()
     console.log("MONGO DB connection failed !!! ",err);
     
 })
+
+// 👉 What happens here?
+
+// Loads environment variables from .env file.
+// Connects to MongoDB using connectDB().
+// If successful, starts the Express server (app.listen()).
+// If MongoDB fails, it logs an error and doesn’t start the server.
+
+
+
+
+
+
+
+
 
 
 // import mongoose from "mongoose";
@@ -44,3 +61,13 @@ connectDB()
         
 //     }
 // })();
+
+
+
+
+
+
+
+
+
+
