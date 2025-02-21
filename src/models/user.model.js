@@ -50,6 +50,7 @@ const userSchema = new Schema(
   }
 );
 
+//HASHING THE PASSWORD : Middleware to Hash Password Before Saving
 userSchema.pre("save", async function (next) {
   // never user arrow functions here this it doesn't know this>?:????
   if (!this.isModified("password")) return next();
@@ -57,10 +58,13 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+//Method to Check If Password Is Correct
 userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password); // gives true or false whether the password is matched or not
 };
 
+
+//Method to Generate Access Token (JWT)
 userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     {
@@ -76,6 +80,14 @@ userSchema.methods.generateAccessToken = function () {
   );
 };
 
+// Purpose: Generates a short-lived access token (JWT) that allows the user to stay logged in.
+// How it works:
+// Takes the user's _id, email, username, and fullname.
+// Signs them with a secret key (ACCESS_TOKEN_SECRET) stored in environment variables.
+// The token expires after a set time (ACCESS_TOKEN_EXPIRY).
+
+
+
 userSchema.methods.generateRefreshToken = function () {
     return jwt.sign(
         {
@@ -90,5 +102,8 @@ userSchema.methods.generateRefreshToken = function () {
         }
       );
 };
+
+// Purpose: Generates a refresh token, which is used to get a new access token without requiring a login.
+// Works the same way as generateAccessToken, but it uses REFRESH_TOKEN_SECRET and has a longer expiration time.
 
 export const User = mongoose.model("User", userSchema);
