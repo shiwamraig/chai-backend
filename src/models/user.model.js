@@ -18,11 +18,17 @@ const userSchema = new Schema(
       lowercase: true,
       trim: true,
     },
-    fullname: {
+    fullName: {
       type: String,
       required: true,
       trim: true,
       index: true,
+    },
+    get fullname() {
+      return this.fullName;
+    },
+    set fullname(value) {
+      this.fullName = value;
     },
     avatar: {
       type: String, // cloudinary url
@@ -54,7 +60,7 @@ const userSchema = new Schema(
 userSchema.pre("save", async function (next) {
   // never user arrow functions here this it doesn't know this>?:????
   if (!this.isModified("password")) return next();
-  this.password = bcrypt.hash(this.password, 10);
+  this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
