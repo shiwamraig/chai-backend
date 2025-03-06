@@ -24,12 +24,6 @@ const userSchema = new Schema(
       trim: true,
       index: true,
     },
-    get fullname() {
-      return this.fullName;
-    },
-    set fullname(value) {
-      this.fullName = value;
-    },
     avatar: {
       type: String, // cloudinary url
       required: true,
@@ -112,4 +106,5 @@ userSchema.methods.generateRefreshToken = function () {
 // Purpose: Generates a refresh token, which is used to get a new access token without requiring a login.
 // Works the same way as generateAccessToken, but it uses REFRESH_TOKEN_SECRET and has a longer expiration time.
 
-export const User = mongoose.model("User", userSchema);
+ const User = mongoose.model("User", userSchema);
+export {User};

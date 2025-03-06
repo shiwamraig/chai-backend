@@ -1,20 +1,19 @@
 const asyncHandler =(requestHandler)=>{
     return (req,res,next)=>{
-        Promise.resolve(requestHandler(req,res,next)).catch((err)=>next(err))
+        Promise.resolve(requestHandler(req,res,next)).catch((err)=>next(err))//. Express does NOT catch errors from async functions automatically!
     }
 
 }
 
 export {asyncHandler}
 
-// In Express.js, when handling asynchronous operations (like database calls or external API requests), errors can occur. If an error is not properly handled, 
-// it can cause the server to hang or crash.
-// asyncHandler is supposed to take an asynchronous function (requestHandler) and return a new function that:
+// This function:
 
-// 1. Executes requestHandler inside a Promise.resolve().
-// 2. Catches any errors that occur and automatically passes them to Express’s next() function, which allows Express's built-in error handling middleware to 
-// process the error.
-// This approach eliminates the need to manually wrap every route handler in try-catch blocks.
+// Takes another function (requestHandler) as an argument.
+// Returns a new function that takes (req, res, next), which are standard Express middleware parameters.
+// Executes requestHandler inside Promise.resolve() to handle both synchronous and asynchronous operations.
+// If requestHandler throws an error, .catch(next) automatically forwards it to Express error-handling middleware instead of crashing the app.
+
 
 //------------ ANOTHER APPROACH ---------------
 
@@ -30,3 +29,15 @@ export {asyncHandler}
 //     }
 // }
 
+// 🔹 Why Do We Need a Promise Here?
+// In Express, route handlers can be synchronous or asynchronous.
+
+// Synchronous functions return a value directly.
+// Asynchronous functions return a Promise (e.g., functions using async/await).
+// Since asynchronous functions might fail, we need a way to catch errors automatically and forward them to Express's error-handling middleware.
+
+//-------SUMMARY-------
+// Express does not automatically catch errors in async functions.
+// Without Promises, unhandled errors inside async functions can crash the app.
+// Promise.resolve() ensures all functions (sync or async) are handled correctly.
+// asyncHandler automatically catches errors and forwards them to Express's error middleware.
