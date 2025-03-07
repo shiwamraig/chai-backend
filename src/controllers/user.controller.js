@@ -195,21 +195,24 @@ const incomingRefreshToken = req.cookies.refreshtoken || req.body.refreshtoken
 
 if(!incomingRefreshToken){
     throw new ApiError(401,"Unauthorized request");
-
 }
 
-try {
+try {   
+    //Verifying the Refresh Token
     const decodedtoken =jwt.verify(
         incomingRefreshToken,
         process.env.REFRESH_TOKEN_SECRET
     )
     
-     const user = await User.findById(decodedtoken?._id)
+     const user = await User.findById(decodedtoken?._id) // if the token is valid, we extract the user ID from it.
         if(!user){
             throw new ApiError(401,"Invalid refresh token");
         }
     
     if(incomingRefreshToken!==user?.refreshToken){
+// Each user has one valid refresh token stored in the database.
+// If the refresh token they sent does not match the one stored → We reject the request.
+// This prevents someone from using an old, stolen, or already used refresh token.
         throw new ApiError(401,"Refresh token is expired or used");
     }
     
@@ -218,8 +221,8 @@ try {
         secure: true,
       };
     
-    const {accessToken,newrefreshToken}   =await generateAccessAndRefreshToken(user._id);
-    
+    const {accessToken,newrefreshToken}   =await generateAccessAndRefreshToken(user._id);//These tokens will replace the old ones and keep the user logged in.
+
     return res
       .status(200)
       .cookie("accesstoken", accessToken, options)
