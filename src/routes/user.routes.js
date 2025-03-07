@@ -18,7 +18,7 @@ router.route("/logout").post(verifyJWT,logoutUser);
 // Before running logoutUser function, the middleware verifyJWT ensures that the user is logged in.
 // If the user has a valid token, they can log out.
 // If the user doesn’t have a valid token, access is denied (401 Unauthorized).
-
+router.route("/refresh-token").post(refreshAccessToken);
 
 
 
