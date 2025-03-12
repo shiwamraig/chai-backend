@@ -247,4 +247,101 @@ try {
 
 });
 
-export { registerUser,loginUser,logoutUser,refreshAccessToken };
+
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+const {oldPassword,newPassword} = req.body; // oldPassword and newPassword <--- data sent from the frontend(req.body).
+const user = await User.findById(req.user?._id);// req.user contains the user data from the verifyJWT middleware.
+const isPasswordCorrect= await  user.isPasswordCorrect(oldPassword)
+if(!isPasswordCorrect){
+    throw new ApiError(401,"Invalid old password");
+}
+
+user.password = newPassword; // set kara h save nhi kara
+await user.save({validateBeforeSave:false}) // abb save kr diya
+
+return res.status(200).json(new ApiResponse(200,{},"Password changed successfully"));
+});
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+    return res
+    .status(200)
+    .json(200,req.user,"current user fetched successfully");
+});
+
+const updateAccountDetails = asyncHandler(async (req, res) => {         //try to write update in new file (advice by hitesh sir)
+const {fullName,email}= req.body;
+if(!fullName && !email){
+    throw new ApiError(400,"All fields are required");
+}
+
+const user = User.findByIdAndUpdate(req.user?._id, //Updating the User in the Database
+    {
+        $set:{   //$set tells MongoDB to update only the provided fields.
+            fullName,
+            email:email
+        }
+    },
+    {
+        new:true //Ensures the function returns the updated user
+    }).select("-password ")
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200,user,"Account details updated successfully"));
+
+});
+
+const updateUserAvatar = asyncHandler(async (req, res) => {
+    const avatarLocalPath=req.file?.path; //req.file.path contains the local file path where the uploaded file is stored.
+    if(!avatarLocalPath){
+        throw new ApiError(400,"Avatar is required");
+    }
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+    
+    if(!avatar.url){
+        throw new ApiError(500,"Something went wrong while uploading the avatar");
+    }
+
+    const user = User.findByIdAndUpdate(
+        req.user?._id,
+        { $set:{
+            avatar:avatar.url
+        }},
+       //vatar.url (or result.secure_url) is the URL where the image is stored.
+       //You're saving this URL in MongoDB under avatar so the frontend can display the image without storing it locally.
+    {
+        new:true
+    }).select("-password ");
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200,user,"Avatar updated successfully"));
+    });
+const updateUserCoverImage = asyncHandler(async (req, res) => {
+    const coverImageLocalPath=req.file?.path; //req.file.path contains the local file path where the uploaded file is stored.
+    if(!coverImageLocalPath){
+        throw new ApiError(400,"coverImage is required");
+    }
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+    
+    if(!coverImage.url){
+        throw new ApiError(500,"Something went wrong while uploading the coverImage");
+    }
+
+    const user =User.findByIdAndUpdate(
+        req.user?._id,
+        { $set:{
+            coverImage:coverImage.url
+        }},
+       //vatar.url (or result.secure_url) is the URL where the image is stored.
+       //You're saving this URL in MongoDB under avatar so the frontend can display the image without storing it locally.
+    {
+        new:true
+    }).select("-password ");
+    
+    return res
+    .status(200)
+    .json(new ApiResponse(200,user,"coverImage updated successfully"));
+    });
+
+export { registerUser,loginUser,logoutUser,refreshAccessToken,changeCurrentPassword,getCurrentUser,updateAccountDetails,updateUserAvatar,updateUserCoverImage }; 
