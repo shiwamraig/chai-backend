@@ -333,7 +333,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         { $set:{
             coverImage:coverImage.url
         }},
-       //vatar.url (or result.secure_url) is the URL where the image is stored.
+       //avatar.url (or result.secure_url) is the URL where the image is stored.
        //You're saving this URL in MongoDB under avatar so the frontend can display the image without storing it locally.
     {
         new:true
